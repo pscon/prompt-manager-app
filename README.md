@@ -79,9 +79,10 @@ npm run build
 - Performance optimizations (React.memo, debounced search)
 - Accessibility improvements (ARIA labels, keyboard navigation)
 
-## CORS Issues
+## Deployed URL
 
-If you encounter CORS errors during development, you can:
-1. Use a browser extension to disable CORS
-2. Run the app with a proxy server
-3. Fetch the data once and serve it locally
+[Mini Prompt Manager](https://mini-prompt-manager.netlify.app/)
+
+## Author
+
+Ekunola Paul
