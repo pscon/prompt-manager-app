@@ -11,7 +11,7 @@ const Login: React.FC = () => {
     setError('');
 
     if (!username.trim()) {
-      setError('Username is required');
+      setError('Please enter a username');
       return;
     }
 
@@ -21,6 +21,13 @@ const Login: React.FC = () => {
     }
 
     login(username.trim());
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setUsername(e.target.value);
+    if (error) {
+      setError('');
+    }
   };
 
   return (
@@ -44,17 +51,23 @@ const Login: React.FC = () => {
                 id="username"
                 name="username"
                 type="text"
-                required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                // required
+                className={`appearance-none rounded-none relative block w-full px-3 py-2 border placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:z-10 sm:text-sm ${
+                  error 
+                    ? 'border-red-300 focus:ring-red-500 focus:border-red-500' 
+                    : 'border-gray-300 focus:ring-indigo-500 focus:border-indigo-500'
+                }`}
                 placeholder="Username"
                 value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                onChange={handleInputChange}
               />
             </div>
           </div>
 
           {error && (
-            <div className="text-red-600 text-sm text-center">{error}</div>
+            <div className="text-red-600 text-sm text-center bg-red-50 border border-red-200 rounded-md px-3 py-2">
+              {error}
+            </div>
           )}
 
           <div>

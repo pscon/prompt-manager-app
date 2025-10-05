@@ -15,6 +15,8 @@ const Dashboard: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
   const [categories, setCategories] = useState<string[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(9); 
 
   useEffect(() => {
     fetchPrompts();
@@ -88,12 +90,29 @@ const Dashboard: React.FC = () => {
     }
   };
 
+  const clearFilters = () => {
+    setSearchTerm('');
+    setCategoryFilter('');
+    setCurrentPage(1);
+  };
+
   const filteredPrompts = prompts.filter(prompt => {
     const matchesSearch = prompt.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          prompt.description.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = !categoryFilter || prompt.category === categoryFilter;
     return matchesSearch && matchesCategory;
   });
+
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredPrompts.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedPrompts = filteredPrompts.slice(startIndex, endIndex);
+
+  // Reset to first page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, categoryFilter]);
 
   if (loading) {
     return (
@@ -180,8 +199,24 @@ const Dashboard: React.FC = () => {
             </button>
           </div>
           
+          {/* Clear Filters Button */}
+          {(searchTerm || categoryFilter) && (
+            <div className="mb-4">
+              <button
+                onClick={clearFilters}
+                className="inline-flex items-center px-3 py-2 text-sm font-medium text-red-600 bg-red-50 border border-red-200 rounded-md hover:bg-red-100 hover:text-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200"
+              >
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                Clear Filters
+              </button>
+            </div>
+          )}
+          
           <div className="text-sm text-gray-600">
-            Showing {filteredPrompts.length} of {prompts.length} prompts
+            Showing {startIndex + 1}-{Math.min(endIndex, filteredPrompts.length)} of {filteredPrompts.length} prompts
+            {totalPages > 1 && ` (Page ${currentPage} of ${totalPages})`}
           </div>
         </div>
 
@@ -198,16 +233,80 @@ const Dashboard: React.FC = () => {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredPrompts.map(prompt => (
-              <PromptCard
-                key={prompt.id}
-                prompt={prompt}
-                onUpdateRating={handleUpdateRating}
-                onDelete={handleDeletePrompt}
-              />
-            ))}
-          </div>
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {paginatedPrompts.map(prompt => (
+                <PromptCard
+                  key={prompt.id}
+                  prompt={prompt}
+                  onUpdateRating={handleUpdateRating}
+                  onDelete={handleDeletePrompt}
+                />
+              ))}
+            </div>
+            
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="mt-8 flex items-center justify-center">
+                <nav className="flex items-center space-x-2">
+                  {/* Previous Button */}
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                    disabled={currentPage === 1}
+                    className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Previous
+                  </button>
+                  
+                  {/* Page Numbers */}
+                  <div className="flex space-x-1">
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => {
+                      // Show first page, last page, current page, and pages around current
+                      const shouldShow = 
+                        page === 1 || 
+                        page === totalPages || 
+                        (page >= currentPage - 1 && page <= currentPage + 1);
+                      
+                      if (!shouldShow) {
+                        // Show ellipsis for gaps
+                        if (page === currentPage - 2 || page === currentPage + 2) {
+                          return (
+                            <span key={page} className="px-3 py-2 text-sm text-gray-500">
+                              ...
+                            </span>
+                          );
+                        }
+                        return null;
+                      }
+                      
+                      return (
+                        <button
+                          key={page}
+                          onClick={() => setCurrentPage(page)}
+                          className={`px-3 py-2 text-sm font-medium rounded-md ${
+                            page === currentPage
+                              ? 'bg-indigo-600 text-white'
+                              : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
+                          }`}
+                        >
+                          {page}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  
+                  {/* Next Button */}
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                    disabled={currentPage === totalPages}
+                    className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Next
+                  </button>
+                </nav>
+              </div>
+            )}
+          </>
         )}
       </main>
 
