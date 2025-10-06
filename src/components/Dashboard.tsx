@@ -5,6 +5,7 @@ import { normalizeRating, denormalizeRating } from '../utils/rating';
 import { useAuth } from '../contexts/AuthContext';
 import PromptCard from './PromptCard';
 import PromptForm from './PromptForm';
+import { toast } from 'react-toastify';
 
 const Dashboard: React.FC = () => {
   const { user, logout } = useAuth();
@@ -61,8 +62,24 @@ const Dashboard: React.FC = () => {
       }
       
       setShowForm(false);
+      toast.success('Prompt created successfully!', {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create prompt');
+      toast.error('Failed to create prompt. Please try again.', {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
     }
   };
 
@@ -85,8 +102,24 @@ const Dashboard: React.FC = () => {
     try {
       await ApiService.deletePrompt(id);
       setPrompts(prev => prev.filter(prompt => prompt.id !== id));
+      toast.success('Prompt deleted successfully!', {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to delete prompt');
+      toast.error('Failed to delete prompt. Please try again.', {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
     }
   };
 

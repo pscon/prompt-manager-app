@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import type { NormalizedPrompt } from '../types';
 import { getRatingOptions } from '../utils/rating';
+import ConfirmationModal from './ConfirmationModal';
 
 interface PromptCardProps {
   prompt: NormalizedPrompt;
@@ -9,15 +10,23 @@ interface PromptCardProps {
 }
 
 const PromptCard: React.FC<PromptCardProps> = ({ prompt, onUpdateRating, onDelete }) => {
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+
   const handleRatingChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newRating = parseFloat(e.target.value);
     onUpdateRating(prompt?.id || '', newRating);
   };
 
-  const handleDelete = () => {
-    if (window.confirm('Are you sure you want to delete this prompt?')) {
-      onDelete(prompt?.id || '');
-    }
+  const handleDeleteClick = () => {
+    setShowDeleteModal(true);
+  };
+
+  const handleDeleteConfirm = () => {
+    onDelete(prompt?.id || '');
+  };
+
+  const handleDeleteCancel = () => {
+    setShowDeleteModal(false);
   };
 
   const renderStars = (rating: number) => {
@@ -52,7 +61,7 @@ const PromptCard: React.FC<PromptCardProps> = ({ prompt, onUpdateRating, onDelet
       <div className="flex justify-between items-start mb-4">
         <h3 className="text-lg capitalize font-semibold text-gray-900">{prompt?.title || 'Untitled'}</h3>
         <button
-          onClick={handleDelete}
+          onClick={handleDeleteClick}
           className="text-red-600 hover:text-red-800 text-sm font-medium"
         >
           Delete
@@ -86,6 +95,17 @@ const PromptCard: React.FC<PromptCardProps> = ({ prompt, onUpdateRating, onDelet
           </select>
         </div>
       </div>
+
+      <ConfirmationModal
+        isOpen={showDeleteModal}
+        onClose={handleDeleteCancel}
+        onConfirm={handleDeleteConfirm}
+        title="Delete Prompt"
+        message={`Are you sure you want to delete "${prompt?.title || 'this prompt'}"? This action cannot be undone.`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        confirmButtonStyle="danger"
+      />
     </div>
   );
 };
