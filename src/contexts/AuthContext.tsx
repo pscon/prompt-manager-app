@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState } from 'react';
 import type { ReactNode } from 'react';
 import type { User } from '../types';
+import { toast } from 'react-toastify';
 
 interface AuthContextType {
   user: User | null;
@@ -34,6 +35,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const newUser = { username };
     setUser(newUser);
     localStorage.setItem('user', JSON.stringify(newUser));
+    toast.success(`Welcome back, ${username}!`, {
+      position: "top-right",
+      autoClose: 3000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+    });
   };
 
   const logout = () => {
